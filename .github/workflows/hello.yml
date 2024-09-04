@@ -1,0 +1,13 @@
+name: Hello World
+
+on: push
+
+jobs:
+  hello-world:
+    name: Hello World
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet user group
+        run: |
+          echo "Hello Omaha AWS user group!"
+
