@@ -1,23 +1,17 @@
-name: Checkout and list dir
+name: Terraform Plan
 
 on: push
 
 jobs:
   terraform-plan:
-    name: checkout and list
+    name: Terraform plan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: List dir
-        run: ls -la
-
-      # - name: change dir
-      #   run: cd terraform
-
-      # - name: terraform init
-      #   run: terraform init
-
-      # - name: terraform Plan
-      #   run: terraform plan
+      - name: terraform Plan
+        run: |
+          cd terraform-demo
+          terraform init
+          terraform plan
