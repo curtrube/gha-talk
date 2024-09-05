@@ -8,6 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Greet user group
-        run: |
-          echo "Hello Omaha AWS user group!"
+        run: echo "Hello Omaha AWS user group!"
+
 
