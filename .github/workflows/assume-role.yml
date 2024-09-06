@@ -19,3 +19,7 @@ jobs:
       - name: Get caller identity
         run: |
           aws sts get-caller-identity
+
+      - name: Print repo name
+        run: |
+          echo "${{ github.repository }}"
