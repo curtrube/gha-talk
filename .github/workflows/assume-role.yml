@@ -97,6 +97,7 @@ jobs:
         run: |
           TF_ACTION=${{ inputs.action }}
           TF_ROOT_DIR=${{ needs.get-env-vars.outputs.terraform_root_dir }}
+          ENV=${{ inputs.environment }}
 
           cd $TF_ROOT_DIR
 
@@ -105,7 +106,7 @@ jobs:
 
           echo "terraform $TF_ACTION"
           if [ "$TF_ACTION" = "plan" ]; then
-            terraform plan  -var-file=environments/"${{ inputs.environment }}".tfvars
+            terraform plan  -var-file=environments/$ENV.tfvars
           elif [ "$TF_ACTION" = "apply" ]; then
             terraform apply --auto-approve
           elif [ "$TF_ACTION" = "destroy" ]; then
