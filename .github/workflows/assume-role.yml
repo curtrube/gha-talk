@@ -16,6 +16,7 @@ on:
           - plan
           - apply
           - destroy
+          - unlock
       environment:
         description: Environment
         required: true
@@ -86,7 +87,7 @@ jobs:
           }
           EOF
           )
-          echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend-new.tf"
+          echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend.tf"
 
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -94,17 +95,17 @@ jobs:
 
       - name: Run terraform
         run: |
-          terraform --version
           TF_ACTION=${{ inputs.action }}
+          TF_ROOT_DIR=${{ needs.get-env-vars.outputs.terraform_root_dir }}
 
-          cd $terraform_root_dir
+          cd $TF_ROOT_DIR
 
           terraform init
           terraform validate
 
           echo "terraform $TF_ACTION"
           if [ "$TF_ACTION" = "plan" ]; then
-            terraform plan
+            terraform plan  -var-file=environments/"${{ inputs.environment }}".tfvars
           elif [ "$TF_ACTION" = "apply" ]; then
             terraform apply --auto-approve
           elif [ "$TF_ACTION" = "destroy" ]; then
