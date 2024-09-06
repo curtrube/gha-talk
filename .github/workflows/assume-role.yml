@@ -104,15 +104,12 @@ jobs:
           terraform init
           terraform validate
 
-          echo "terraform $TF_ACTION"
+          echo "terraform $TF_ACTION -var-file=environments/$ENV.tfvars"
           if [ "$TF_ACTION" = "plan" ]; then
-            echo "terraform plan -var-file=environments/$ENV.tfvars"
             terraform plan -var-file=environments/$ENV.tfvars
           elif [ "$TF_ACTION" = "apply" ]; then
-            echo "terraform apply -var-file=environments/$ENV.tfvars --auto-approve"
             terraform apply -var-file=environments/$ENV.tfvars --auto-approve
           elif [ "$TF_ACTION" = "destroy" ]; then
-            echo "terraform destroy -var-file=environments/$ENV.tfvars --auto-approve"
             terraform destroy -var-file=environments/$ENV.tfvars --auto-approve
           else
             echo "Invalid action $TF_ACTION"
