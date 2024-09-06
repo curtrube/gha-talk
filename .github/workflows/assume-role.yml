@@ -2,7 +2,7 @@ name: AWS Assume Role (OIDC)
 
 env:
   terraform_root_dir: "terraform-demo"
-  terraform_version: 1.9
+  terraform_version: 1.7
 
 on: 
   workflow_dispatch:
@@ -36,8 +36,10 @@ jobs:
     - id: get-env-vars
       run: |
         echo "terraform_root_dir"=${{ env.terraform_root_dir }} >> $GITHUB_OUTPUT
+        echo "terraform_version"=${{ env.terraform_version }} >> $GITHUB_OUTPUT
     outputs:
       terraform_root_dir: ${{ steps.get-env-vars.outputs.terraform_root_dir }}
+      terraform_version: ${{ steps.get-env-vars.outputs.terraform_version }}
 
   assume-role:
     runs-on: ubuntu-latest
@@ -65,28 +67,47 @@ jobs:
         run: |
           echo ${{ steps.repo-basename.outputs.value }}
 
-      - name: Generate backend.tf
-        run: |
-          bucket_name="terraform-state-992382678496"
-          dynamodb_table="terraform-lock-992382678496"
-          region="us-east-1"
-          workspace=${{ steps.repo-basename.outputs.value }}
-          environment="${{ inputs.environment }}"
-          backend_config=$(cat <<EOF
-          terraform {
-            backend "s3" {
-              bucket         = "$bucket_name"
-              key            = "$workspace/$environment.terraform.tfstate"
-              region         = "$region"
-              encrypt        = true
-              dynamodb_table = "$dynamodb_table"
-            }
-          }
-          EOF
-          )
-          echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend-new.tf"
+      # - name: Generate backend.tf
+      #   run: |
+      #     bucket_name="terraform-state-992382678496"
+      #     dynamodb_table="terraform-lock-992382678496"
+      #     region="us-east-1"
+      #     workspace=${{ steps.repo-basename.outputs.value }}
+      #     environment="${{ inputs.environment }}"
+      #     backend_config=$(cat <<EOF
+      #     terraform {
+      #       backend "s3" {
+      #         bucket         = "$bucket_name"
+      #         key            = "$workspace/$environment.terraform.tfstate"
+      #         region         = "$region"
+      #         encrypt        = true
+      #         dynamodb_table = "$dynamodb_table"
+      #       }
+      #     }
+      #     EOF
+      #     )
+      #     echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend-new.tf"
 
-      - name: list dir
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ needs.get-env-vars.outputs.terraform_version }}
+
+      - name: Run terraform
         run: |
-          ls -la terraform-demo
-          cat ./terraform-demo/backend-new.tf
+          TF_ACTION=${{ inputs.action }}
+
+          cd $terraform_root_dir
+
+          terraform init
+          terraform validate
+
+          echo "terraform $TF_ACTION"
+          if [ "$TF_ACTION" = "plan" ]; then
+            terraform plan
+          elif [ "$TF_ACTION" = "apply" ]; then
+            terraform apply --auto-approve
+          elif [ "$TF_ACTION" = "destroy" ]; then
+            terraform destroy --auto-approve
+          else
+            echo "Invalid action $TF_ACTION"
+          fi
