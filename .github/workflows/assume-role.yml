@@ -2,16 +2,46 @@ name: AWS Assume Role (OIDC)
 
 env:
   terraform_root_dir: "terraform-demo"
+  terraform_version: 1.9
 
-on: push
+on: 
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Terraform action
+        required: true
+        type: choice
+        default: plan
+        options:
+          - plan
+          - apply
+          - destroy
+      environment:
+        description: Environment
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
+  get-env-vars:
+    runs-on: ubuntu-latest
+    steps:
+    - id: get-env-vars
+      run: |
+        echo "terraform_root_dir"=${{ env.terraform_root_dir }} >> $GITHUB_OUTPUT
+    outputs:
+      terraform_root_dir: ${{ steps.get-env-vars.outputs.terraform_root_dir }}
+
   assume-role:
     runs-on: ubuntu-latest
+    needs: get-env-vars
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,7 +71,7 @@ jobs:
           dynamodb_table="terraform-lock-992382678496"
           region="us-east-1"
           workspace=${{ steps.repo-basename.outputs.value }}
-          environment="dev"
+          environment="${{ inputs.environment }}"
           backend_config=$(cat <<EOF
           terraform {
             backend "s3" {
@@ -54,7 +84,7 @@ jobs:
           }
           EOF
           )
-          echo "$backend_config" > "./${{ env.terraform_root_dir }}/backend-new.tf"
+          echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend-new.tf"
 
       - name: list dir
         run: |
