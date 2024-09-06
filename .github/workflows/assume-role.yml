@@ -20,6 +20,11 @@ jobs:
         run: |
           aws sts get-caller-identity
 
-      - name: Print repo name
+      - id: repo-basename
         run: |
-          echo "${{ github.repository }}"
+          echo "value=`basename ${{ github.repository }}`" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: print repo name
+        run: |
+          echo ${{ steps.repo-basename.outputs.value }}
