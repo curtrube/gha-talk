@@ -1,0 +1,21 @@
+name: AWS Assume Role (OIDC)
+
+on: push
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  assume-role:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS assume role with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::992382678496:role/GitHubActionsAdminRole
+
+      - name: Get caller identity
+        run: |
+          aws sts get-caller-identity
