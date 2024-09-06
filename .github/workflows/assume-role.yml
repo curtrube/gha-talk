@@ -1,5 +1,8 @@
 name: AWS Assume Role (OIDC)
 
+env:
+  terraform_root_dir: "terraform-demo"
+
 on: push
 
 permissions:
@@ -10,6 +13,9 @@ jobs:
   assume-role:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: AWS assume role with OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -28,3 +34,29 @@ jobs:
       - name: print repo name
         run: |
           echo ${{ steps.repo-basename.outputs.value }}
+
+      - name: Generate backend.tf
+        run: |
+          bucket_name="terraform-state-992382678496"
+          dynamodb_table="terraform-lock-992382678496"
+          region="us-east-1"
+          workspace=${{ steps.repo-basename.outputs.value }}
+          environment="dev"
+          backend_config=$(cat <<EOF
+          terraform {
+            backend "s3" {
+              bucket         = "$bucket_name"
+              key            = "$workspace/$environment.terraform.tfstate"
+              region         = "$region"
+              encrypt        = true
+              dynamodb_table = "$dynamodb_table"
+            }
+          }
+          EOF
+          )
+          echo "$backend_config" > "./${{ env.terraform_root_dir }}/backend-new.tf"
+
+      - name: list dir
+        run: |
+          ls -la terraform-demo
+          cat ./terraform-demo/backend-new.tf
