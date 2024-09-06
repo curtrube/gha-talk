@@ -43,7 +43,30 @@ jobs:
           name: terraform-plan
           path: ./terraform-demo/tfplan
 
-      - name: Terraform apply
-        if: success()
+  terraform-apply:
+    name: Terraform apply
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: terraform-demo/
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9
+        
+      - name: list files
         run: |
-          terraform -chdir=./terraform-demo apply --auto-approve
+          cd terraform-demo
+          ls -la
+
+      - name: Terraform apply
+        run: |
+          terraform -chdir=./terraform-demo apply --auto-approve tfplan
