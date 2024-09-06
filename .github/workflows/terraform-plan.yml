@@ -42,3 +42,8 @@ jobs:
         with:
           name: terraform-plan
           path: ./terraform-demo/tfplan
+
+      - name: Terraform apply
+        if: success()
+        run: |
+          terraform -chdir=./terraform-demo apply --auto-approve
