@@ -94,6 +94,7 @@ jobs:
 
       - name: Run terraform
         run: |
+          terraform --version
           TF_ACTION=${{ inputs.action }}
 
           cd $terraform_root_dir
