@@ -63,6 +63,8 @@ jobs:
           aws_account_id=$(aws ssm get-parameter --name "/accounts/${{ needs.get-env-vars.outputs.aws_account_prefix }}/${{ inputs.environment }}" --with-decryption --query "Parameter.Value")
           echo $aws_account_id
 
+      # Once we have the target env account ID we need to assume role into that account
+
       - name: Get caller identity
         run: |
           aws sts get-caller-identity
@@ -76,6 +78,7 @@ jobs:
         run: |
           echo ${{ steps.repo-basename.outputs.value }}
 
+      # update with the target account id
       - name: Generate backend.tf
         run: |
           bucket_name="terraform-state-992382678496"
