@@ -106,11 +106,14 @@ jobs:
 
           echo "terraform $TF_ACTION"
           if [ "$TF_ACTION" = "plan" ]; then
-            terraform plan  -var-file=environments/$ENV.tfvars
+            echo "terraform plan -var-file=environments/$ENV.tfvars"
+            terraform plan -var-file=environments/$ENV.tfvars
           elif [ "$TF_ACTION" = "apply" ]; then
-            terraform apply --auto-approve
+            echo "terraform apply -var-file=environments/$ENV.tfvars --auto-approve"
+            terraform apply -var-file=environments/$ENV.tfvars --auto-approve
           elif [ "$TF_ACTION" = "destroy" ]; then
-            terraform destroy --auto-approve
+            echo "terraform destroy -var-file=environments/$ENV.tfvars --auto-approve"
+            terraform destroy -var-file=environments/$ENV.tfvars --auto-approve
           else
             echo "Invalid action $TF_ACTION"
           fi
