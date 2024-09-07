@@ -96,11 +96,11 @@ jobs:
           backend_config=$(cat <<EOF
           terraform {
             backend "s3" {
-              bucket         = "terraform-state-$aws_account_id"
+              bucket         = "terraform-state-992382678496"
               key            = "$workspace/$ENVIRONMENT.terraform.tfstate"
               region         = "$region"
               encrypt        = true
-              dynamodb_table = "terraform-lock-$aws_account_id"
+              dynamodb_table = "terraform-lock-992382678496"
             }
           }
           EOF
