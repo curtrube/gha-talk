@@ -96,11 +96,11 @@ jobs:
           # Generate workflow variables
           variables=$(cat <<EOF
           variable "environment" {
-            default = $ENVIRONMENT
+            default = "$ENVIRONMENT"
           }
           EOF
           )
-          echo "$variables" > "vars.tf"
+          echo "$variables" > "./$TF_ROOT_DIR/vars.tf"
 
           # Generate remote state backend
           backend_config=$(cat <<EOF
