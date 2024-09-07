@@ -93,6 +93,7 @@ jobs:
           region="us-east-1"
           workspace=${{ steps.repo-basename.outputs.value }}
 
+          # Generate remote state backend
           backend_config=$(cat <<EOF
           terraform {
             backend "s3" {
