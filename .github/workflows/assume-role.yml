@@ -78,37 +78,35 @@ jobs:
         run: |
           echo ${{ steps.repo-basename.outputs.value }}
 
-      # update with the target account id
-      - name: Generate backend.tf
-        run: |
-          bucket_name="terraform-state-992382678496"
-          dynamodb_table="terraform-lock-992382678496"
-          region="us-east-1"
-          workspace=${{ steps.repo-basename.outputs.value }}
-          environment="${{ inputs.environment }}"
-          backend_config=$(cat <<EOF
-          terraform {
-            backend "s3" {
-              bucket         = "$bucket_name"
-              key            = "$workspace/$environment.terraform.tfstate"
-              region         = "$region"
-              encrypt        = true
-              dynamodb_table = "$dynamodb_table"
-            }
-          }
-          EOF
-          )
-          echo "$backend_config" > "./${{ needs.get-env-vars.outputs.terraform_root_dir }}/backend.tf"
-
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ needs.get-env-vars.outputs.terraform_version }}
+
+      # Generate additional variables.tf
 
       - name: Run terraform
         run: |
           TF_ACTION=${{ inputs.action }}
           TF_ROOT_DIR=${{ needs.get-env-vars.outputs.terraform_root_dir }}
-          ENV=${{ inputs.environment }}
+          ENVIRONMENT=${{ inputs.environment }}
+
+          region="us-east-1"
+          workspace=${{ steps.repo-basename.outputs.value }}
+
+          backend_config=$(cat <<EOF
+          terraform {
+            backend "s3" {
+              bucket         = "terraform-state-$aws_account_id"
+              key            = "$workspace/$ENVIRONMENT.terraform.tfstate"
+              region         = "$region"
+              encrypt        = true
+              dynamodb_table = "terraform-lock-$aws_account_id"
+            }
+          }
+          EOF
+          )
+
+          echo "$backend_config" > "./$TF_ROOT_DIR/backend.tf"
 
           cd $TF_ROOT_DIR
 
