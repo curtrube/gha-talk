@@ -93,6 +93,15 @@ jobs:
           region="us-east-1"
           workspace=${{ steps.repo-basename.outputs.value }}
 
+          # Generate workflow variables
+          variables=$(cat <<EOF
+          variable "environment" {
+            default = $ENVIRONMENT
+          }
+          EOF
+          )
+          echo "$variables" > "vars.tf"
+
           # Generate remote state backend
           backend_config=$(cat <<EOF
           terraform {
@@ -106,7 +115,6 @@ jobs:
           }
           EOF
           )
-
           echo "$backend_config" > "./$TF_ROOT_DIR/backend.tf"
 
           cd $TF_ROOT_DIR
