@@ -60,4 +60,4 @@ jobs:
       terraform_directory: ${{ needs.get-env-vars.outputs.terraform_root_directory }}
       environment: ${{ inputs.environment }}
       aws_account_id: 992382678496
-      region: us-east-1
+      aws_region: us-east-1
